@@ -13,4 +13,13 @@ class Les6Item(scrapy.Item):
     link = scrapy.Field()
     source = scrapy.Field()
     _id = scrapy.Field()
+
+    title = scrapy.Field()
+    author = scrapy.Field()
+    price = scrapy.Field()
+    new_price = scrapy.Field()
+    old_price = scrapy.Field()
+    rate = scrapy.Field()
+
+    scrap = scrapy.Field()
     pass

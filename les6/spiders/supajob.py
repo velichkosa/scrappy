@@ -13,7 +13,6 @@ class SupajobSpider(scrapy.Spider):
         next_page = response.xpath("//a[@rel='next' and contains(@class,'dalshe')]/@href").extract_first()
         for element in vac_links:
             yield response.follow(element, callback=self.vac_parse)
-
         if next_page:
             yield response.follow(next_page, callback=self.parse)
 
@@ -22,5 +21,6 @@ class SupajobSpider(scrapy.Spider):
         vac_sal = response.xpath("//span[@class='_1h3Zg _2Wp8I _2rfUm _2hCDz']/text()").extract()
         vac_link = response.url
         vac_src = SupajobSpider.allowed_domains[0]
-        item = Les6Item(name=vac_name, salary=vac_sal, link=vac_link, source=vac_src)
+        scrap = 'superjob_ru'
+        item = Les6Item(name=vac_name, salary=vac_sal, link=vac_link, source=vac_src, scrap=scrap)
         yield item

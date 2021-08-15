@@ -15,19 +15,25 @@ class Les6Pipeline:
     def __init__(self):
         self.MONGO_HOST = "localhost"
         self.MONGO_PORT = 27017
-        self.MONGO_DB = "vacancies"
 
     def process_item(self, item, spider):
-        if type(item['salary']) == type(''):
-            item['salary'] = self.process_sal_hh(item['salary'])
-        elif type(item['salary']) == type([]):
-            item['salary'] = self.process_sal_sj(item['salary'])
         MONGO_COLLECTION = spider.name
-        self.to_mongo(item, MONGO_COLLECTION)
+        MONGO_DB = item['scrap']
+        self.process_direct(item['scrap'], item, MONGO_COLLECTION, MONGO_DB)
+
+    def process_direct(self, scrap, item, MONGO_COLLECTION, MONGO_DB):
+        if scrap == 'hh_ru':
+            self.process_sal_hh(item, MONGO_COLLECTION, MONGO_DB)
+        elif scrap == 'superjob_ru':
+            self.process_sal_sj(item, MONGO_COLLECTION, MONGO_DB)
+        elif scrap == 'labirint_ru':
+            self.process_labirint(item, MONGO_COLLECTION, MONGO_DB)
+        elif scrap == 'book24_ru':
+            self.process_book24(item, MONGO_COLLECTION, MONGO_DB)
 
     # разбор salary для HH
-    def process_sal_hh(self, salary):
-        sal_dct = dict()
+    def process_sal_hh(self, item, MONGO_COLLECTION, MONGO_DB):
+        salary = item['salary']
         if salary == 'з/п не указана':
             sal_dct = {'min': None, 'max': None, 'cur': None}
         val = re.split(' – | ', salary.replace('\xa0', ''))
@@ -60,11 +66,12 @@ class Les6Pipeline:
             sal_dct = {'min': int(val[1]), 'max': int(val[3]), 'cur': 'EUR'}
         if len(val) == 5 and val[0] == 'от' and val[2] == 'до' and val[4] == 'USD':
             sal_dct = {'min': int(val[1]), 'max': int(val[3]), 'cur': 'USD'}
-        return sal_dct
+        item['salary'] = sal_dct
+        self.to_mongo_vacancy(item, MONGO_COLLECTION, MONGO_DB)
 
     # разбор salary для SJ
-    def process_sal_sj(self, salary):
-        sal_dct = dict()
+    def process_sal_sj(self, item, MONGO_COLLECTION, MONGO_DB):
+        salary = item['salary']
         if len(salary) == 1 and salary[0] == 'По договорённости':
             sal_dct = {'min': 'По договорённости', 'max': 'По договорённости', 'cur': '-'}
         elif len(salary) == 4:
@@ -80,17 +87,47 @@ class Les6Pipeline:
                 sal_dct = {'min': None, 'max': int(salary[2]), 'cur': salary[3]}
             else:
                 sal_dct = {'min': int(salary[1]), 'max': int(salary[2]), 'cur': salary[3]}
-        return sal_dct
+        item['salary'] = sal_dct
+        self.to_mongo_vacancy(item, MONGO_COLLECTION, MONGO_DB)
 
-    def to_mongo(self, base, MONGO_COLLECTION):
+    def process_labirint(self, item, MONGO_COLLECTION, MONGO_DB):
+        self.to_mongo_book(item, MONGO_COLLECTION, MONGO_DB)
+
+    def process_book24(self, item, MONGO_COLLECTION, MONGO_DB):
+        self.to_mongo_book(item, MONGO_COLLECTION, MONGO_DB)
+
+    def to_mongo_vacancy(self, base, MONGO_COLLECTION, MONGO_DB):
         with MongoClient(self.MONGO_HOST, self.MONGO_PORT) as client:
-            db = client[self.MONGO_DB]
+            db = client[MONGO_DB]
             users = db[MONGO_COLLECTION]
             update_data = {
                 "$set": {
                     "name": base['name'],
                     "link": base['link'],
                     "salary": base['salary'],
+                    "source": base['source']
+                }
+            }
+            filter_data = {"link": base['link']}
+            users.update_many(filter_data, update_data, upsert=True)
+
+    def to_mongo_book(self, base, MONGO_COLLECTION, MONGO_DB):
+        with MongoClient(self.MONGO_HOST, self.MONGO_PORT) as client:
+            db = client[MONGO_DB]
+            users = db[MONGO_COLLECTION]
+            try:
+                price = base['price']
+            except:
+                price = None
+            update_data = {
+                "$set": {
+                    "author": base['author'],
+                    "title": base['title'],
+                    "link": base['link'],
+                    "price": price,
+                    "new price": base['new_price'],
+                    "old price": base['old_price'],
+                    "rate": base['rate'],
                     "source": base['source']
                 }
             }
