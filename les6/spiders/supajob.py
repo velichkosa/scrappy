@@ -2,7 +2,7 @@
 
 import scrapy
 from scrapy.http import HtmlResponse
-from les6.items import Les6Item
+from les6.items import VacancyItem
 
 
 class SupajobSpider(scrapy.Spider):
@@ -24,5 +24,5 @@ class SupajobSpider(scrapy.Spider):
         vac_link = response.url
         vac_src = SupajobSpider.allowed_domains[0]
         scrap = 'superjob_ru'
-        item = Les6Item(name=vac_name, salary=vac_sal, link=vac_link, source=vac_src, scrap=scrap)
+        item = VacancyItem(name=vac_name, salary=vac_sal, link=vac_link, source=vac_src, scrap=scrap)
         yield item
