@@ -1,6 +1,8 @@
+# final_branch
+
 import scrapy
 from scrapy.http import HtmlResponse
-from les6.items import Les6Item
+from les6.items import BookItem
 
 
 class Book24Spider(scrapy.Spider):
@@ -27,6 +29,6 @@ class Book24Spider(scrapy.Spider):
         rate = response.xpath("//meta[@itemprop='ratingValue']/@content").extract_first()
         src = Book24Spider.allowed_domains[0]
         scrap = 'book24_ru'
-        item = Les6Item(title=title, link=book_link, author=author, new_price=new_price, \
+        item = BookItem(title=title, link=book_link, author=author, new_price=new_price, \
                         old_price=old_price, rate=rate, source=src, scrap=scrap)
         yield item

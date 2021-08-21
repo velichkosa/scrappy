@@ -1,6 +1,8 @@
+# final_branch
+
 import scrapy
 from scrapy.http import HtmlResponse
-from les6.items import Les6Item
+from les6.items import BookItem
 
 
 class LabirintSpider(scrapy.Spider):
@@ -26,6 +28,6 @@ class LabirintSpider(scrapy.Spider):
         rate = response.xpath("//div[@id='rate']/text()").extract_first()
         src = LabirintSpider.allowed_domains[0]
         scrap = 'labirint_ru'
-        item = Les6Item(title=title, link=book_link, author=author, price=price, new_price=new_price, \
+        item = BookItem(title=title, link=book_link, author=author, price=price, new_price=new_price, \
                         old_price=old_price, rate=rate, source=src, scrap=scrap)
         yield item

@@ -1,3 +1,5 @@
+# final_branch
+
 # Define your item pipelines here
 #
 # Don't forget to add your pipeline to the ITEM_PIPELINES setting
@@ -39,33 +41,15 @@ class Les6Pipeline:
         val = re.split(' – | ', salary.replace('\xa0', ''))
         if val == ['None']:
             sal_dct = {'min': None, 'max': None, 'cur': None}
-        if len(val) == 3 and val[0] == 'от' and val[2] == 'руб.':
-            sal_dct = {'min': int(val[1]), 'max': None, 'cur': 'руб.'}
-        if len(val) == 3 and val[0] == 'от' and val[2] == 'USD':
-            sal_dct = {'min': int(val[1]), 'max': None, 'cur': 'USD'}
-        if len(val) == 3 and val[0] == 'от' and val[2] == 'EUR':
-            sal_dct = {'min': int(val[1]), 'max': None, 'cur': 'EUR'}
-        if len(val) == 3 and val[0] == 'до' and val[2] == 'USD':
-            sal_dct = {'min': None, 'max': int(val[1]), 'cur': 'USD'}
-        if len(val) == 3 and val[0] == 'до' and val[2] == 'руб.':
-            sal_dct = {'min': None, 'max': int(val[1]), 'cur': 'руб.'}
-        if len(val) == 3 and val[0] == 'до' and val[2] == 'EUR':
-            sal_dct = {'min': None, 'max': int(val[1]), 'cur': 'EUR'}
+        if len(val) == 3 and val[0] == 'от':
+            sal_dct = {'min': int(val[1]), 'max': None, 'cur': val[2]}
+        if len(val) == 3 and val[0] == 'до':
+            sal_dct = {'min': None, 'max': int(val[1]), 'cur': val[2]}
         if len(val) == 3 and val[0] != 'до' and val[0] != 'от' \
-                and val[1] != 'до' and val[1] != 'от' and val[2] == 'руб.':
-            sal_dct = {'min': int(val[0]), 'max': int(val[1]), 'cur': 'руб.'}
-        if len(val) == 3 and val[0] != 'до' and val[0] != 'от' \
-                and val[1] != 'до' and val[1] != 'от' and val[2] == 'USD':
-            sal_dct = {'min': int(val[0]), 'max': int(val[1]), 'cur': 'USD'}
-        if len(val) == 3 and val[0] != 'до' and val[0] != 'от' \
-                and val[1] != 'до' and val[1] != 'от' and val[2] == 'EUR':
-            sal_dct = {'min': int(val[0]), 'max': int(val[1]), 'cur': 'EUR'}
-        if len(val) == 5 and val[0] == 'от' and val[2] == 'до' and val[4] == 'руб.':
-            sal_dct = {'min': int(val[1]), 'max': int(val[3]), 'cur': 'руб.'}
-        if len(val) == 5 and val[0] == 'от' and val[2] == 'до' and val[4] == 'EUR':
-            sal_dct = {'min': int(val[1]), 'max': int(val[3]), 'cur': 'EUR'}
-        if len(val) == 5 and val[0] == 'от' and val[2] == 'до' and val[4] == 'USD':
-            sal_dct = {'min': int(val[1]), 'max': int(val[3]), 'cur': 'USD'}
+                and val[1] != 'до' and val[1] != 'от':
+            sal_dct = {'min': int(val[0]), 'max': int(val[1]), 'cur': val[2]}
+        if len(val) == 5 and val[0] == 'от' and val[2] == 'до':
+            sal_dct = {'min': int(val[1]), 'max': int(val[3]), 'cur': val[4]}
         item['salary'] = sal_dct
         self.to_mongo_vacancy(item, MONGO_COLLECTION, MONGO_DB)
 
